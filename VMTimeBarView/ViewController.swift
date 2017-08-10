@@ -8,13 +8,14 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, VMTimeBarViewDelegate {
 
     @IBOutlet weak var timerView: VMTimeBarView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        self.timerView.delegate = self
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -27,6 +28,10 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
+    func timerDidFinish() {
+         //Do Something when timer finishes
+        print("Timer finished")
+    }
 
 }
 

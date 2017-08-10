@@ -8,10 +8,17 @@
 
 import UIKit
 
+protocol VMTimeBarViewDelegate: class {
+    func timerDidFinish()
+}
+
 @IBDesignable
 class VMTimeBarView: UIView {
 
-    //Public properties
+    //MARK: - Public properties
+    
+    weak var delegate: VMTimeBarViewDelegate?
+    
     @IBInspectable var boundaryColor: UIColor = .blue {
         didSet {
             self.backgroundColor = boundaryColor
@@ -28,22 +35,25 @@ class VMTimeBarView: UIView {
         }
     }
     
-    @IBInspectable var boundaryWidth: CGFloat = 2.0 {
+    @IBInspectable var boundaryWidth: CGFloat = 1.0 {
         didSet {
             self.updateConstraints(forView: self.paddingView,
                                    withPadding: boundaryWidth)
         }
     }
-    @IBInspectable var padding: CGFloat = 4.0 {
+    @IBInspectable var padding: CGFloat = 1.0 {
         didSet {
             self.updateConstraints(forView: self.timerView,
                                    withPadding: padding)
         }
     }
     
+    //MARK: - Private properties
     private var paddingView: UIView = UIView()
     private var timerView: UIView = UIView()
     
+    
+    //MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.setupView()
@@ -71,7 +81,7 @@ class VMTimeBarView: UIView {
                        animations: {
                         self.layoutIfNeeded()
         }) { (isFinished) in
-            //
+            self.delegate?.timerDidFinish()
         }
     }
     
@@ -139,7 +149,7 @@ class VMTimeBarView: UIView {
                                    withPadding padding: CGFloat) {
         if let constraints = view.superview?.constraints {
             for const in constraints {
-                if const.firstItem as! NSObject == self.paddingView {
+                if const.firstItem as! NSObject == view {
                     if (const.firstAttribute == .top ||
                         const.firstAttribute == .leading){
                         const.constant = padding
