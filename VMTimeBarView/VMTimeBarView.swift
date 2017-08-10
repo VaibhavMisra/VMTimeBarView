@@ -8,13 +8,38 @@
 
 import UIKit
 
+@IBDesignable
 class VMTimeBarView: UIView {
 
     //Public properties
-    var boundaryColor = UIColor.blue
-    var paddingColor = UIColor.white
-    var timerColor = UIColor.red
-    var padding: CGFloat = 10.0
+    @IBInspectable var boundaryColor: UIColor = .blue {
+        didSet {
+            self.backgroundColor = boundaryColor
+        }
+    }
+    @IBInspectable var paddingColor: UIColor = .white {
+        didSet {
+            self.paddingView.backgroundColor = paddingColor
+        }
+    }
+    @IBInspectable var timerColor: UIColor = .red {
+        didSet {
+            self.timerView.backgroundColor = timerColor
+        }
+    }
+    
+    @IBInspectable var boundaryWidth: CGFloat = 2.0 {
+        didSet {
+            self.updateConstraints(forView: self.paddingView,
+                                   withPadding: boundaryWidth)
+        }
+    }
+    @IBInspectable var padding: CGFloat = 4.0 {
+        didSet {
+            self.updateConstraints(forView: self.timerView,
+                                   withPadding: padding)
+        }
+    }
     
     private var paddingView: UIView = UIView()
     private var timerView: UIView = UIView()
@@ -29,11 +54,34 @@ class VMTimeBarView: UIView {
         self.setupView()
     }
     
-    func setupView() {
+    //MARK: - Public methods
+    
+    func startTimer(for seconds: TimeInterval, withDelay delay: TimeInterval) {
+        let constraints = self.paddingView.constraints
+        for const in constraints {
+            if const.firstItem as! NSObject == self.timerView,
+                const.firstAttribute == .top {
+                const.constant = self.paddingView.bounds.maxY - self.padding
+            }
+        }
+        
+        UIView.animate(withDuration: seconds,
+                       delay: delay,
+                       options: .layoutSubviews,
+                       animations: {
+                        self.layoutIfNeeded()
+        }) { (isFinished) in
+            //
+        }
+    }
+    
+    //MARK: - Private Methods
+    
+    private func setupView() {
         self.backgroundColor = self.boundaryColor
         self.createView(view: self.paddingView,
                         parent: self,
-                        padding: 4.0,
+                        padding: self.boundaryWidth,
                         color: self.paddingColor)
         self.createView(view: self.timerView,
                         parent: self.paddingView,
@@ -41,7 +89,7 @@ class VMTimeBarView: UIView {
                         color: self.timerColor)
     }
     
-    func createView(view: UIView, parent: UIView,
+    private func createView(view: UIView, parent: UIView,
                     padding: CGFloat, color: UIColor) {
         view.backgroundColor = color
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -51,7 +99,7 @@ class VMTimeBarView: UIView {
                                      padding: padding)
     }
     
-    func createPaddingConstraint(for view: UIView,
+    private func createPaddingConstraint(for view: UIView,
                                  parent: UIView, padding: CGFloat) {
         let topConst = NSLayoutConstraint(item: view,
                                           attribute: .top,
@@ -87,22 +135,22 @@ class VMTimeBarView: UIView {
         NSLayoutConstraint.activate([topConst, bottomConst, leadingConst, trailingConst])
     }
     
-    func startTimer(for seconds: TimeInterval, withDelay delay: TimeInterval) {
-        let constraints = self.paddingView.constraints
-        for const in constraints {
-            if const.firstItem as! NSObject == self.timerView,
-                const.firstAttribute == .top {
-                const.constant = self.paddingView.bounds.maxY - self.padding
+    private func updateConstraints(forView view: UIView,
+                                   withPadding padding: CGFloat) {
+        if let constraints = view.superview?.constraints {
+            for const in constraints {
+                if const.firstItem as! NSObject == self.paddingView {
+                    if (const.firstAttribute == .top ||
+                        const.firstAttribute == .leading){
+                        const.constant = padding
+                    }
+                    else if (const.firstAttribute == .bottom ||
+                        const.firstAttribute == .trailing) {
+                        const.constant = (-1 * padding)
+                    }
+                }
+                
             }
-        }
-        
-        UIView.animate(withDuration: seconds,
-                       delay: delay,
-                       options: .layoutSubviews,
-                       animations: {
-                        self.layoutIfNeeded()
-        }) { (isFinished) in
-            //
         }
     }
 
