@@ -34,6 +34,11 @@ class VMTimeBarView: UIView {
             self.timerView.backgroundColor = timerColor
         }
     }
+    @IBInspectable var timerLabelColor: UIColor = .red {
+        didSet {
+            self.timerLabel.textColor = timerLabelColor
+        }
+    }
     
     @IBInspectable var boundaryWidth: CGFloat = 1.0 {
         didSet {
@@ -51,6 +56,9 @@ class VMTimeBarView: UIView {
     //MARK: - Private properties
     private var paddingView: UIView = UIView()
     private var timerView: UIView = UIView()
+    private var timerLabel: UILabel = UILabel()
+    var countdown = 0
+    var myTimer: Timer? = nil
     
     
     //MARK: - Init
@@ -83,6 +91,30 @@ class VMTimeBarView: UIView {
         }) { (isFinished) in
             self.delegate?.timerDidFinish()
         }
+
+        self.countdown = Int(seconds)
+        self.timerLabel.text = "\(countdown)"
+        
+        var delayInSeconds = 0.0
+        if delay > 2.0 {
+            delayInSeconds = delay - 1.0
+        }
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + delayInSeconds) {
+            
+            self.myTimer = Timer.scheduledTimer(timeInterval: 1.0,
+                                                target: self,
+                                                selector: #selector(VMTimeBarView.countDownTick),
+                                                userInfo: nil, repeats: true)
+        }
+    }
+    
+    func countDownTick() {
+        self.countdown -= 1
+        if (countdown == 0) {
+            self.myTimer!.invalidate()
+            self.myTimer = nil
+        }
+        self.timerLabel.text = "\(countdown)"
     }
     
     //MARK: - Private Methods
@@ -97,6 +129,10 @@ class VMTimeBarView: UIView {
                         parent: self.paddingView,
                         padding: self.padding,
                         color: self.timerColor)
+        self.createLabel(label: self.timerLabel,
+                         textColor: self.timerLabelColor,
+                         parent: self.timerView,
+                         padding: 0)
     }
     
     private func createView(view: UIView, parent: UIView,
@@ -143,6 +179,53 @@ class VMTimeBarView: UIView {
                                                multiplier: 1.0,
                                                constant: (-1 * padding))
         NSLayoutConstraint.activate([topConst, bottomConst, leadingConst, trailingConst])
+    }
+    
+    private func createLabel(label: UILabel, textColor: UIColor,
+                             parent: UIView, padding: CGFloat) {
+        label.text = "0"
+        label.textAlignment = .center
+        label.textColor = textColor
+        label.translatesAutoresizingMaskIntoConstraints = false
+        parent.addSubview(label)
+        self.pinToBottom(for: label,
+                         parent: parent,
+                         padding: padding)
+    }
+    
+    private func pinToBottom(for view: UIView, parent: UIView, padding: CGFloat) {
+        let heightConst = NSLayoutConstraint(item: view,
+                                          attribute: .height,
+                                          relatedBy: .equal,
+                                          toItem: view,
+                                          attribute: .height,
+                                          multiplier: 1,
+                                          constant: 30.0)
+        
+        let bottomConst = NSLayoutConstraint(item: view,
+                                             attribute: .bottom,
+                                             relatedBy: .equal,
+                                             toItem: parent,
+                                             attribute: .bottom,
+                                             multiplier: 1.0,
+                                             constant: (-1 * padding))
+        
+        let leadingConst = NSLayoutConstraint(item: view,
+                                              attribute: .leading,
+                                              relatedBy: .equal,
+                                              toItem: parent,
+                                              attribute: .leading,
+                                              multiplier: 1.0,
+                                              constant: padding)
+        
+        let trailingConst = NSLayoutConstraint(item: view,
+                                               attribute: .trailing,
+                                               relatedBy: .equal,
+                                               toItem: parent,
+                                               attribute: .trailing,
+                                               multiplier: 1.0,
+                                               constant: (-1 * padding))
+        NSLayoutConstraint.activate([heightConst, bottomConst, leadingConst, trailingConst])
     }
     
     private func updateConstraints(forView view: UIView,
