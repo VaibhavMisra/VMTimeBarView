@@ -36,6 +36,9 @@
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="leG-pU-KMB" secondAttribute="bottom" constant="20" id="vXo-85-km2"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="timerView" destination="leG-pU-KMB" id="Ub4-41-rYB"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>

@@ -87,7 +87,7 @@ class VMTimeBarView: UIView {
         NSLayoutConstraint.activate([topConst, bottomConst, leadingConst, trailingConst])
     }
     
-    func startTimer(for seconds: TimeInterval) {
+    func startTimer(for seconds: TimeInterval, withDelay delay: TimeInterval) {
         let constraints = self.paddingView.constraints
         for const in constraints {
             if const.firstItem as! NSObject == self.timerView,
@@ -97,7 +97,7 @@ class VMTimeBarView: UIView {
         }
         
         UIView.animate(withDuration: seconds,
-                       delay: 2.0,
+                       delay: delay,
                        options: .layoutSubviews,
                        animations: {
                         self.layoutIfNeeded()
